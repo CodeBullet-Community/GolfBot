@@ -1,4 +1,5 @@
 import * as discord from 'discord.js';
+import * as request from 'request';
 import * as fs from 'fs';
 import * as conf from './bot-config.json';
 
@@ -36,7 +37,22 @@ let commands = {
         if (!conf.botMasters.includes(message.author.id)) return; // when the command only should be used by mods
         // stuff
         message.channel.send('pong');
-    }
+    },
+    'rules': async (message: discord.Message, args: string) => {
+        const rulesEmbed = new discord.RichEmbed()
+            .setColor('#00b300')
+            .setTitle('Coding Golf Rules')
+            .setTimestamp()
+            .setFooter(`ID: ${message.author.id}`);
+
+        message.channel.send(rulesEmbed);
+    },
+    'submit': async (message: discord.Message, args: string) => {
+        let attachments = message.attachments.array();
+        let fileType = attachments[0].filename.substring(attachments[0].filename.indexOf("."));
+        let fileName = message.author.username + message.createdTimestamp + fileType;
+        let fileURL = attachments[0].url;
+    },
 };
 
 let client = new discord.Client({ disableEveryone: true });
