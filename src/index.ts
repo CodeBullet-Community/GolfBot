@@ -35,7 +35,7 @@ let commands = {
     'ping': async (message: discord.Message, args: string) => {
         if (!conf.botMasters.includes(message.author.id)) return; // when the command only should be used by mods
         // stuff
-        message.channel.send('pong');
+        message.channel.send(`pong, ${message.channel.id}`);
     },
     'rules': async (message: discord.Message, args: string) => {
         const rulesEmbed = new discord.RichEmbed()
@@ -52,8 +52,10 @@ let commands = {
         let fileName = message.author.username + message.createdTimestamp + fileType;
 
         let attachment = new discord.Attachment(file.url, fileName);
-        message.channel.send(attachment);
-        message.delete;
+        let submissionChannel = message.client.channels.get(conf.channels.test);
+        if (submissionChannel instanceof discord.TextChannel) submissionChannel.send(attachment);
+        message.delete();
+        message.reply("Your submission has successfully been sent");
     },
 };
 
