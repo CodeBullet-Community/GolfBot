@@ -32,9 +32,10 @@ process.on('unhandledRejection', async (reason, promise) => {
 
 // all commands
 let commands = {
-    '[command name]': async (message: discord.Message, args: string) => {
+    'ping': async (message: discord.Message, args: string) => {
         if (!conf.botMasters.includes(message.author.id)) return; // when the command only should be used by mods
         // stuff
+        message.channel.send('pong');
     }
 };
 
