@@ -32,15 +32,33 @@ process.on('unhandledRejection', async (reason, promise) => {
 
 // all commands
 let commands = {
-    'ping': async (message: discord.Message, args: string) => {
+    'rank': async (message: discord.Message, args: string) => {
         if (!conf.botMasters.includes(message.author.id)) return; // when the command only should be used by mods
-        // stuff
-        message.channel.send(`pong, ${message.channel.id}`);
+        let params = args.split(" "); // params = [epoch1, epoch2, number of results]
+
+        // divide epoch by 1000 to get seconds
+        let submissionChannel = message.client.channels.get(conf.channels.test);
+        if (submissionChannel instanceof discord.TextChannel)
+            submissionChannel.fetchMessages()
+                .then(messages => {
+                    let m = messages.filter(m => m.createdTimestamp >=  parseInt(params[0]) && m.createdTimestamp <=  parseInt(params[1]) && m.attachments.first() != undefined).array();
+                    m.sort(compare);
+                    for (let i = 0; i < parseInt(params[2]); i++) {
+                        const file = m[i].attachments.first();
+                        let fileType = file.filename.substring(file.filename.lastIndexOf("."));
+                        let fileName = `${message.author.username}_${message.createdTimestamp + fileType}`;
+                        let attachment = new discord.Attachment(file.url, );
+                        message.channel.send(`#${i +1}: Submission (${file.filesize} bytes) from ${m[i].author.username} (${m[i].author.id}) made in ${m[i].channel instanceof discord.DMChannel ? 'DM' : m[i].channel}`, attachment);
+                    }
+                })
+                .catch(console.error);
     },
-    'rules': async (message: discord.Message, args: string) => {
+    'golf': async (message: discord.Message, args: string) => {
         const rulesEmbed = new discord.RichEmbed()
             .setColor('#00b300')
-            .setTitle('Coding Golf Rules')
+            .setTitle('Code Golf')
+            .addField('Current golfing problem', 'Make a bot to do golfing-mod\'s work')
+            .addField('Submission deadline', 'When ever code golfing begins')
             .setTimestamp()
             .setFooter(`Courtesy of Nemo & Otaku`);
 
@@ -55,7 +73,7 @@ let commands = {
             let attachment = new discord.Attachment(file.url, fileName);
             let submissionChannel = message.client.channels.get(conf.channels.test);
             if (submissionChannel instanceof discord.TextChannel) {
-                submissionChannel.send(`Submission from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
+                submissionChannel.send(`Submission (${file.filesize} bytes) from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
                     .then(() => {
                         message.channel.send(`${message.author.username}, your submission has successfully been sent`);
                     })
@@ -85,5 +103,18 @@ client.on('message', async message => {
     }
 
 });
+
+const compare = (a: discord.Message, b: discord.Message) => {
+    const A = a.attachments.first().filesize;
+    const B = b.attachments.first().filesize;
+    
+    let comparison = 0;
+    if (A > B) {
+      comparison = 1;
+    } else if (A < B) {
+      comparison = -1;
+    }
+    return comparison;
+  }
 
 client.login(conf.botToken);
