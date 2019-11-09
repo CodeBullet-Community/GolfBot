@@ -46,17 +46,14 @@ let commands = {
 
         message.channel.send(rulesEmbed);
     },
-    'submit': async (message: discord.Message, args: string) => {
-        
-        if (message.attachments) {
-            let file = message.attachments.first();
-            let fileType = file.filename.substring(file.filename.indexOf("."));
-            let fileName = message.author.username + message.createdTimestamp + fileType;
+    'submit': async (message: discord.Message, args: string) => {   
+        let file = message.attachments.first();
+        let fileType = file.filename.substring(file.filename.lastIndexOf("."));
+        let fileName = message.author.username + message.createdTimestamp + fileType;
 
-            let attachment = new discord.Attachment(file.url, fileName);
-            message.channel.send(attachment);
-            message.delete;
-        }
+        let attachment = new discord.Attachment(file.url, fileName);
+        message.channel.send(attachment);
+        message.delete;
     },
 };
 
