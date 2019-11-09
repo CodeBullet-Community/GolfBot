@@ -42,20 +42,27 @@ let commands = {
             .setColor('#00b300')
             .setTitle('Coding Golf Rules')
             .setTimestamp()
-            .setFooter(`ID: ${message.author.id}`);
+            .setFooter(`Courtesy of Nemo & Otaku`);
 
         message.channel.send(rulesEmbed);
     },
     'submit': async (message: discord.Message, args: string) => {   
         let file = message.attachments.first();
         let fileType = file.filename.substring(file.filename.lastIndexOf("."));
-        let fileName = message.author.username + message.createdTimestamp + fileType;
+        let fileName = `${message.author.username}_${message.createdTimestamp + fileType}`;
 
         let attachment = new discord.Attachment(file.url, fileName);
         let submissionChannel = message.client.channels.get(conf.channels.test);
-        if (submissionChannel instanceof discord.TextChannel) submissionChannel.send(attachment);
-        message.delete();
-        message.reply("Your submission has successfully been sent");
+        if (submissionChannel instanceof discord.TextChannel) {
+            submissionChannel.send(`Submission from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
+                .then(() => {
+                    message.channel.send(`${message.author.username}, your submission has successfully been sent`);
+                })
+                .catch(() => {
+                    message.channel.send(`${message.author.username}, your submission failed. Your file may be too large.`);
+                });
+        }
+        if(!(message.channel instanceof discord.DMChannel)) message.delete();
     },
 };
 
