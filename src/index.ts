@@ -1,5 +1,4 @@
 import * as discord from 'discord.js';
-import * as request from 'request';
 import * as fs from 'fs';
 import * as conf from './bot-config.json';
 
@@ -53,17 +52,10 @@ let commands = {
             let file = message.attachments.first();
             let fileType = file.filename.substring(file.filename.indexOf("."));
             let fileName = message.author.username + message.createdTimestamp + fileType;
-            let fileURL = file.url;
-            request.defaults({ encoding: null });
-                request.get(fileURL, (err, res, body) => {
-                    fs.writeFileSync("./res/" + fileName, body);
-                    let buffer = fs.readFileSync("./res/" + fileName);
-                    let attachment = new discord.Attachment(buffer, fileName);
-                    message.channel.send(attachment); // TODO: Make it send to admin channel 
-                    fs.unlinkSync("./res/" + fileName);
-                    message.delete();
-                    message.reply("Your file has been submitted");
-            });
+
+            let attachment = new discord.Attachment(file.url, fileName);
+            message.channel.send(attachment);
+            message.delete;
         }
     },
 };
