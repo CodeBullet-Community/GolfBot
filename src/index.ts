@@ -48,10 +48,23 @@ let commands = {
         message.channel.send(rulesEmbed);
     },
     'submit': async (message: discord.Message, args: string) => {
-        let attachments = message.attachments.array();
-        let fileType = attachments[0].filename.substring(attachments[0].filename.indexOf("."));
-        let fileName = message.author.username + message.createdTimestamp + fileType;
-        let fileURL = attachments[0].url;
+        
+        if (message.attachments) {
+            let file = message.attachments.first();
+            let fileType = file.filename.substring(file.filename.indexOf("."));
+            let fileName = message.author.username + message.createdTimestamp + fileType;
+            let fileURL = file.url;
+            request.defaults({ encoding: null });
+                request.get(fileURL, (err, res, body) => {
+                    fs.writeFileSync("./res/" + fileName, body);
+                    let buffer = fs.readFileSync("./res/" + fileName);
+                    let attachment = new discord.Attachment(buffer, fileName);
+                    message.channel.send(attachment); // TODO: Make it send to admin channel 
+                    fs.unlinkSync("./res/" + fileName);
+                    message.delete();
+                    message.reply("Your file has been submitted");
+            });
+        }
     },
 };
 
