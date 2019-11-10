@@ -46,7 +46,7 @@ let commands = {
                     for (let i = 0; i < parseInt(params[2]); i++) {
                         const file = m[i].attachments.first();
                         let attachment = new discord.Attachment(file.url);
-                        message.channel.send(`#${i +1}: Submission (${file.filesize} bytes) from ${m[i].author.username} (${m[i].author.id}) made in ${m[i].channel instanceof discord.DMChannel ? 'DM' : m[i].channel}`, attachment);
+                        message.channel.send(`#${i +1}: ${m[i].content}`, attachment);
                     }
                 })
                 .catch(console.error);
@@ -113,6 +113,6 @@ const compare = (a: discord.Message, b: discord.Message) => {
       comparison = -1;
     }
     return comparison;
-  }
+}
 
 client.login(conf.botToken);
