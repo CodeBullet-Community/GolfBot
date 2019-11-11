@@ -46,10 +46,28 @@ let commands = {
                     for (let i = 0; i < parseInt(params[2]); i++) {
                         const file = m[i].attachments.first();
                         let attachment = new discord.Attachment(file.url);
-                        message.channel.send(`#${i +1}: ${m[i].content}`, attachment);
+                        message.channel.send(`#${i +1}: ${m[i].content}`, attachment)
                     }
                 })
-                .catch(console.error);
+                .catch(() => message.channel.send("There was a problem retrieving the messages"));
+    },
+    'clear': async (message: discord.Message, args: string) => {
+        // args = epoch
+        if (!conf.botMasters.includes(message.author.id)) return;
+
+        // divide epoch by 1000 to get seconds
+        let submissionChannel = message.client.channels.get(conf.channels.test);
+        if (submissionChannel instanceof discord.TextChannel)
+            submissionChannel.fetchMessages({limit: 100})
+                .then(messages => {
+                    let m = messages.filter(mes => mes.createdTimestamp <= parseInt(args) && mes.attachments.first() != undefined).array();
+                    m.forEach(mes => {
+                        mes.delete()
+                            .catch(() => message.channel.send("There was a problem deleting the messages"));
+                    });
+                    message.channel.send(`Messages sent before ${args} were deleted`);
+                })
+                .catch(() => message.channel.send("There was a problem retrieving the messages"));
     },
     'golf': async (message: discord.Message, args: string) => {
         const rulesEmbed = new discord.RichEmbed()
