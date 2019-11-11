@@ -46,7 +46,7 @@ let commands = {
                     for (let i = 0; i < parseInt(params[2]); i++) {
                         const file = m[i].attachments.first();
                         let attachment = new discord.Attachment(file.url);
-                        message.channel.send(`#${i +1}: ${m[i].content}`, attachment)
+                        message.channel.send(`#${i +1}: ${m[i].content}`, attachment);
                     }
                 })
                 .catch(() => message.channel.send("There was a problem retrieving the messages"));
@@ -60,6 +60,7 @@ let commands = {
         if (submissionChannel instanceof discord.TextChannel)
             submissionChannel.fetchMessages({limit: 100})
                 .then(messages => {
+                    // mes.createdTimestamp returns timestamp of the bot's copied message, no the original
                     let m = messages.filter(mes => mes.createdTimestamp <= parseInt(args) && mes.attachments.first() != undefined).array();
                     m.forEach(mes => {
                         mes.delete()
