@@ -34,14 +34,15 @@ process.on('unhandledRejection', async (reason, promise) => {
 let commands = {
     'rank': async (message: discord.Message, args: string) => {
         if (!conf.botMasters.includes(message.author.id)) return; // when the command only should be used by mods
-        let params = args.split(" "); // params = [epoch1, epoch2, number of results]
 
-        // divide epoch by 1000 to get seconds
+        // date format used: '04 Dec 1995 00:12:00 GMT'
+        let params = args.split(","); // params = [date1, date2, number of results] || Seperate parameters with ','
+
         let submissionChannel = message.client.channels.get(conf.channels.test);
         if (submissionChannel instanceof discord.TextChannel)
             submissionChannel.fetchMessages()
                 .then(messages => {
-                    let m = messages.filter(m => m.createdTimestamp >=  parseInt(params[0]) && m.createdTimestamp <=  parseInt(params[1]) && m.attachments.first() != undefined).array();
+                    let m = messages.filter(m => m.createdTimestamp >=  Date.parse(params[0]) && m.createdTimestamp <=  Date.parse(params[1]) && m.attachments.first() != undefined).array();
                     m.sort(compare);
                     for (let i = 0; i < parseInt(params[2]); i++) {
                         const file = m[i].attachments.first();
@@ -52,15 +53,14 @@ let commands = {
                 .catch(() => message.channel.send("There was a problem retrieving the messages"));
     },
     'clear': async (message: discord.Message, args: string) => {
-        // args = epoch
         if (!conf.botMasters.includes(message.author.id)) return;
 
-        // divide epoch by 1000 to get seconds
+        // date format used: '04 Dec 1995 00:12:00 GMT'
         let submissionChannel = message.client.channels.get(conf.channels.test);
         if (submissionChannel instanceof discord.TextChannel)
             submissionChannel.fetchMessages({limit: 100})
                 .then(messages => {
-                    let m = messages.filter(mes => mes.createdTimestamp <= parseInt(args) && mes.attachments.first() != undefined).array();
+                    let m = messages.filter(mes => mes.createdTimestamp <= Date.parse(args) && mes.attachments.first() != undefined).array();
                     let mTotal = m.length;
                     if (submissionChannel instanceof discord.TextChannel)
                         submissionChannel.bulkDelete(m, true).catch(() => message.channel.send(`Failed to delete messages`));
