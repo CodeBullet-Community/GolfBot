@@ -60,13 +60,11 @@ let commands = {
         if (submissionChannel instanceof discord.TextChannel)
             submissionChannel.fetchMessages({limit: 100})
                 .then(messages => {
-                    // mes.createdTimestamp returns timestamp of the bot's copied message, no the original
                     let m = messages.filter(mes => mes.createdTimestamp <= parseInt(args) && mes.attachments.first() != undefined).array();
-                    m.forEach(mes => {
-                        mes.delete()
-                            .catch(() => message.channel.send("There was a problem deleting the messages"));
-                    });
-                    message.channel.send(`Messages sent before ${args} were deleted`);
+                    let mTotal = m.length;
+                    if (submissionChannel instanceof discord.TextChannel)
+                        submissionChannel.bulkDelete(m, true).catch(() => message.channel.send(`Failed to delete messages`));
+                    message.channel.send(`${mTotal} messages sent before ${args} were deleted`);
                 })
                 .catch(() => message.channel.send("There was a problem retrieving the messages"));
     },
@@ -85,11 +83,11 @@ let commands = {
         let file = message.attachments.first();
         if (file != undefined) {
             let fileType = file.filename.substring(file.filename.lastIndexOf("."));
-            let fileName = `${message.author.username}_${message.createdTimestamp + fileType}`;
+            let fileName = `${message.author.username}_${message.createdTimestamp}${fileType}`;
 
             let attachment = new discord.Attachment(file.url, fileName);
             let submissionChannel = message.client.channels.get(conf.channels.test);
-            if (submissionChannel instanceof discord.TextChannel) {
+            if (submissionChannel instanceof discord.TextChannel)
                 submissionChannel.send(`Submission (${file.filesize} bytes) from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
                     .then(() => {
                         message.channel.send(`${message.author.username}, your submission has successfully been sent`);
@@ -97,7 +95,6 @@ let commands = {
                     .catch(() => {
                         message.channel.send(`${message.author.username}, your submission failed. Your file may be too large.`);
                     });
-            }
         } else {
             message.channel.send(`${message.author.username}, please attach a file`);
         }
