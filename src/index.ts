@@ -68,17 +68,6 @@ let commands = {
                 })
                 .catch(() => message.channel.send("There was a problem retrieving the messages"));
     },
-    'golf': async (message: discord.Message, args: string) => {
-        const rulesEmbed = new discord.RichEmbed()
-            .setColor('#00b300')
-            .setTitle('Code Golf')
-            .addField('Current golfing problem', 'Make a bot to do golfing-mod\'s work')
-            .addField('Submission deadline', 'When ever code golfing begins')
-            .setTimestamp()
-            .setFooter(`Courtesy of Nemo & Otaku`);
-
-        message.channel.send(rulesEmbed);
-    },
     'submit': async (message: discord.Message, args: string) => {
         let file = message.attachments.first();
         if (file != undefined) {
@@ -118,6 +107,7 @@ client.on('message', async message => {
 
 });
 
+// Used to sort messages for ranking
 const compare = (a: discord.Message, b: discord.Message) => {
     const A = a.attachments.first().filesize;
     const B = b.attachments.first().filesize;
