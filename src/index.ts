@@ -38,7 +38,7 @@ let commands = {
         // date format used: '04 Dec 1995 00:12:00 GMT'
         let params = args.split(","); // params = [date1, date2, number of results] || Seperate parameters with ','
 
-        let submissionChannel = message.client.channels.get(conf.channels.test);
+        let submissionChannel = message.client.channels.get(conf.channels.submissions);
         if (submissionChannel instanceof discord.TextChannel)
             submissionChannel.fetchMessages()
                 .then(messages => {
@@ -56,7 +56,7 @@ let commands = {
         if (!conf.botMasters.includes(message.author.id)) return;
 
         // date format used: '04 Dec 1995 00:12:00 GMT'
-        let submissionChannel = message.client.channels.get(conf.channels.test);
+        let submissionChannel = message.client.channels.get(conf.channels.submissions);
         if (submissionChannel instanceof discord.TextChannel)
             submissionChannel.fetchMessages({limit: 100})
                 .then(messages => {
@@ -75,7 +75,7 @@ let commands = {
             let fileName = `${message.author.username}_${message.createdTimestamp}${fileType}`;
 
             let attachment = new discord.Attachment(file.url, fileName);
-            let submissionChannel = message.client.channels.get(conf.channels.test);
+            let submissionChannel = message.client.channels.get(conf.channels.submissions);
             if (submissionChannel instanceof discord.TextChannel)
                 submissionChannel.send(`Submission (${file.filesize} bytes) from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
                     .then(() => {
