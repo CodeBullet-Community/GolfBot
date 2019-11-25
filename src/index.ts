@@ -30,6 +30,8 @@ process.on('unhandledRejection', async (reason, promise) => {
     console.error(error, "Promise:", promise);
 });
 
+let submissionOpen = true;
+
 // all commands
 let commands = {
     'rank': async (message: discord.Message, args: string) => {
@@ -52,6 +54,11 @@ let commands = {
                 })
                 .catch(() => message.channel.send("There was a problem retrieving the messages"));
     },
+    'toggle': async (message: discord.Message, args: string) => {
+        if (!conf.botMasters.includes(message.author.id)) return; // when the command only should be used by mods
+        submissionOpen = !submissionOpen;
+        message.channel.send(`Submissions are now set to ${(submissionOpen) ? "Open" : "Close"}`);
+    },
     'clear': async (message: discord.Message, args: string) => {
         if (!conf.botMasters.includes(message.author.id)) return;
 
@@ -69,23 +76,27 @@ let commands = {
                 .catch(() => message.channel.send("There was a problem retrieving the messages"));
     },
     'submit': async (message: discord.Message, args: string) => {
-        let file = message.attachments.first();
-        if (file != undefined) {
-            let fileType = file.filename.substring(file.filename.lastIndexOf("."));
-            let fileName = `${message.author.username}_${message.createdTimestamp}${fileType}`;
+        if (submissionOpen) {
+            let file = message.attachments.first();
+            if (file != undefined) {
+                let fileType = file.filename.substring(file.filename.lastIndexOf("."));
+                let fileName = `${message.author.username}_${message.createdTimestamp}${fileType}`;
 
-            let attachment = new discord.Attachment(file.url, fileName);
-            let submissionChannel = message.client.channels.get(conf.channels.submissions);
-            if (submissionChannel instanceof discord.TextChannel)
-                submissionChannel.send(`Submission (${file.filesize} bytes) from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
-                    .then(() => {
-                        message.channel.send(`${message.author.username}, your submission has successfully been sent`);
-                    })
-                    .catch(() => {
-                        message.channel.send(`${message.author.username}, your submission failed. Your file may be too large.`);
-                    });
+                let attachment = new discord.Attachment(file.url, fileName);
+                let submissionChannel = message.client.channels.get(conf.channels.submissions);
+                if (submissionChannel instanceof discord.TextChannel)
+                    submissionChannel.send(`Submission (${file.filesize} bytes) from ${message.author.username} (${message.author.id}) made in ${message.channel instanceof discord.DMChannel ? 'DM' : message.channel}`, attachment)
+                        .then(() => {
+                            message.channel.send(`${message.author.username}, your submission has successfully been sent`);
+                        })
+                        .catch(() => {
+                            message.channel.send(`${message.author.username}, your submission failed. Your file may be too large.`);
+                        });
+            } else {
+                message.channel.send(`${message.author.username}, please attach a file`);
+            }
         } else {
-            message.channel.send(`${message.author.username}, please attach a file`);
+            message.channel.send("Sorry, submissions are closed");
         }
         if(!(message.channel instanceof discord.DMChannel)) message.delete();
     },
